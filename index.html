@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Darshitha Gongle — Engineer. Product Thinker. Builder.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --teal: #00D4C8;
@@ -22,9 +23,9 @@
     --text-dim: #3d5555;
     --border: rgba(255,255,255,0.06);
     --border-hover: rgba(0, 212, 200, 0.3);
-    --font-display: 'Syne', sans-serif;
-    --font-body: 'DM Sans', sans-serif;
-    --font-mono: 'DM Mono', monospace;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -162,10 +163,10 @@
 
   .hero-name {
     font-family: var(--font-display);
-    font-size: clamp(52px, 8vw, 96px);
-    font-weight: 800;
-    line-height: 0.95;
-    letter-spacing: -3px;
+    font-size: clamp(72px, 11vw, 140px);
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: 4px;
     color: var(--text);
     margin-bottom: 24px;
     opacity: 0;
@@ -176,10 +177,10 @@
 
   .hero-tagline {
     font-family: var(--font-display);
-    font-size: clamp(18px, 2.5vw, 26px);
-    font-weight: 600;
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 400;
     color: var(--text-muted);
-    letter-spacing: -0.5px;
+    letter-spacing: 6px;
     margin-bottom: 28px;
     opacity: 0;
     animation: fadeUp 0.8s ease forwards 0.55s;
@@ -298,10 +299,10 @@
 
   .section-title {
     font-family: var(--font-display);
-    font-size: clamp(32px, 5vw, 52px);
-    font-weight: 800;
-    letter-spacing: -2px;
-    line-height: 1;
+    font-size: clamp(48px, 7vw, 80px);
+    font-weight: 400;
+    letter-spacing: 3px;
+    line-height: 0.95;
     margin-bottom: 56px;
     color: var(--text);
   }
@@ -378,12 +379,12 @@
 
   .case-title {
     font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -1px;
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: 2px;
     color: var(--text);
     margin-bottom: 12px;
-    line-height: 1.1;
+    line-height: 1;
   }
 
   .case-desc {
@@ -544,9 +545,9 @@
 
   .exp-role {
     font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: 2px;
     color: var(--text);
     margin-bottom: 10px;
   }
@@ -655,9 +656,9 @@
 
   .contact-title {
     font-family: var(--font-display);
-    font-size: clamp(36px, 6vw, 64px);
-    font-weight: 800;
-    letter-spacing: -3px;
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 400;
+    letter-spacing: 4px;
     line-height: 0.95;
     margin-bottom: 24px;
     color: var(--text);
@@ -731,6 +732,21 @@
     50% { opacity: 1; }
   }
 
+  /* ── TYPEWRITER CURSOR ── */
+  .tw-cursor {
+    color: var(--teal);
+    font-family: var(--font-mono);
+    font-size: inherit;
+    font-weight: 300;
+    animation: blink 0.75s step-end infinite;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
   /* ── ACTIVE NAV ── */
   .nav-links a.active { color: var(--teal); }
 
@@ -789,7 +805,7 @@
     <div class="hero-tag">MS CS · Arizona State University · AI/ML</div>
     <h1 class="hero-name">Darshitha<br><span class="accent">Gongle</span></h1>
     <p class="hero-tagline">
-      Engineer<span class="dot">·</span>Product Thinker<span class="dot">·</span>Builder
+      <span id="typewriter"></span><span class="tw-cursor">|</span>
     </p>
     <p class="hero-bio">
       From Hyderabad to Tempe, I build AI products and obsess over why users don't use them the way you expected. Currently specializing in AI/ML at ASU — somewhere between engineer and product thinker, which is honestly a pretty comfortable place to be.
@@ -1049,6 +1065,54 @@
       heroGlow.style.transform = `translate(${e.clientX * 0.03}px, ${e.clientY * 0.03}px)`;
     }
   });
+
+  // Typewriter effect
+  const roles = [
+    'I build it. Then I ask if we should have.',
+    'I ship the feature. Then I break it on purpose.',
+    'I write the code. Then I question the roadmap.',
+    'I find the bug. Then I ask why it existed.'
+  ];
+  const el = document.getElementById('typewriter');
+  let roleIndex = 0;
+  let charIndex = 0;
+  let deleting = false;
+  let paused = false;
+
+  function type() {
+    const current = roles[roleIndex];
+
+    if (paused) {
+      paused = false;
+      setTimeout(type, 2200);
+      return;
+    }
+
+    if (!deleting) {
+      el.textContent = current.slice(0, charIndex + 1);
+      charIndex++;
+      if (charIndex === current.length) {
+        paused = true;
+        deleting = true;
+        setTimeout(type, 100);
+        return;
+      }
+      setTimeout(type, 55);
+    } else {
+      el.textContent = current.slice(0, charIndex - 1);
+      charIndex--;
+      if (charIndex === 0) {
+        deleting = false;
+        roleIndex = (roleIndex + 1) % roles.length;
+        setTimeout(type, 400);
+        return;
+      }
+      setTimeout(type, 40);
+    }
+  }
+
+  // Start after hero fade-in completes
+  setTimeout(type, 1200);
 </script>
 </body>
 </html>
