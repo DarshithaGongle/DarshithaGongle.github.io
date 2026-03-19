@@ -336,6 +336,7 @@
     background: var(--teal-glow);
     opacity: 0;
     transition: opacity 0.3s;
+    pointer-events: none;
   }
 
   .case-card:hover::before { opacity: 1; }
@@ -1074,8 +1075,10 @@
           <span class="stat-label">Bias fixed</span>
         </div>
       </div>
-      <span class="case-arrow">↗</span>
-      <a href="projects.html" class="btn-outline" style="display:inline-block;margin-top:16px;font-size:11px;padding:8px 16px;">View dev breakdown</a>
+      <div style="display:flex;gap:10px;margin-top:20px;position:relative;z-index:2;">
+        <a href="#" class="btn-outline" style="font-size:11px;padding:8px 16px;opacity:0.5;cursor:not-allowed;" title="Coming soon">PM Case Study</a>
+        <a href="projects.html" class="btn-primary" style="font-size:11px;padding:8px 16px;">Dev Breakdown ↗</a>
+      </div>
     </div>
 
     <!-- SignVoice -->
@@ -1102,8 +1105,10 @@
           <span class="stat-label">Support</span>
         </div>
       </div>
-      <span class="case-arrow">↗</span>
-      <a href="projects.html" class="btn-outline" style="display:inline-block;margin-top:16px;font-size:11px;padding:8px 16px;">View dev breakdown</a>
+      <div style="display:flex;gap:10px;margin-top:20px;position:relative;z-index:2;">
+        <a href="#" class="btn-outline" style="font-size:11px;padding:8px 16px;opacity:0.5;cursor:not-allowed;" title="Coming soon">PM Case Study</a>
+        <a href="projects.html" class="btn-primary" style="font-size:11px;padding:8px 16px;">Dev Breakdown ↗</a>
+      </div>
     </div>
     <div class="case-card case-card-full">
       <div>
@@ -1115,9 +1120,9 @@
         </div>
         <h3 class="case-title">Helpdesk AI —<br>Product Teardown</h3>
         <p class="case-desc">A deep-dive product analysis of AI-powered helpdesk tools. Examining user flows, support automation, escalation logic, and where AI fails real users. Includes proposed feature roadmap and go-to-market framing.</p>
-        <span class="case-arrow">↗</span>
-        <span class="coming-soon">In progress</span>
-        <a href="projects.html" class="btn-outline" style="display:inline-block;margin-top:16px;font-size:11px;padding:8px 16px;">View dev breakdown</a>
+        <div style="display:flex;gap:10px;margin-top:20px;position:relative;z-index:2;">
+          <a href="#" class="btn-primary" style="font-size:11px;padding:8px 16px;opacity:0.5;cursor:not-allowed;" title="Coming soon">PM Case Study ↗</a>
+        </div>
       </div>
       <div class="case-visual case-visual-hd">
         <span class="visual-pill pill-ticket">#support-ticket</span>
