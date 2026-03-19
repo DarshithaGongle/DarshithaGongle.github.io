@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Under the Hood — Darshitha Gongle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #00D4C8;
+    --teal-dim: #00a89e;
+    --teal-glow: rgba(0, 212, 200, 0.12);
+    --teal-border: rgba(0, 212, 200, 0.25);
+    --bg: #080c0c;
+    --bg2: #0d1414;
+    --bg3: #111a1a;
+    --surface: #141f1f;
+    --surface2: #1a2828;
+    --text: #e8f0f0;
+    --text-muted: #7a9898;
+    --text-dim: #3d5555;
+    --border: rgba(255,255,255,0.06);
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--teal); color: var(--bg); }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(8,12,12,0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 18px;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: 2px;
+  }
+
+  .nav-logo span { color: var(--teal); }
+
+  .nav-back {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .nav-back:hover { color: var(--teal); }
+
+  /* HERO */
+  .page-hero {
+    padding: 140px 48px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .page-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .page-label::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--teal);
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(56px, 9vw, 110px);
+    font-weight: 400;
+    letter-spacing: 4px;
+    line-height: 0.9;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .page-title span { color: var(--teal); }
+
+  .page-sub {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.8;
+    margin-bottom: 56px;
+  }
+
+  /* PROJECT SELECTOR CARDS */
+  .project-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 1100px;
+    margin: 0 auto 0;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .proj-card {
+    background: var(--bg2);
+    padding: 40px;
+    text-decoration: none;
+    display: block;
+    transition: background 0.2s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+    width: 100%;
+  }
+
+  .proj-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--teal-glow);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .proj-card:hover::before,
+  .proj-card.active::before { opacity: 1; }
+
+  .proj-card.active {
+    background: var(--bg3);
+    border-bottom: 2px solid var(--teal);
+  }
+
+  .proj-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .proj-name {
+    font-family: var(--font-display);
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+
+  .proj-card.active .proj-name { color: var(--teal); }
+
+  .proj-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .proj-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .proj-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal);
+    border: 1px solid var(--teal-border);
+    background: var(--teal-glow);
+    padding: 3px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  /* DIVIDER */
+  .full-divider {
+    height: 1px;
+    background: var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* PROJECT CONTENT */
+  .project-content {
+    display: none;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 48px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .project-content.active {
+    display: block;
+  }
+
+  .project-content.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* SECTION BLOCKS */
+  .content-block {
+    margin-bottom: 72px;
+  }
+
+  .block-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .block-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 60px;
+  }
+
+  .block-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 48px);
+    letter-spacing: 2px;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .block-body {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.85;
+    max-width: 760px;
+  }
+
+  .block-body p { margin-bottom: 16px; }
+  .block-body p:last-child { margin-bottom: 0; }
+
+  .block-body strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* CALLOUT — bias highlight */
+  .callout {
+    border-left: 3px solid var(--teal);
+    background: var(--teal-glow);
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 28px 0;
+    max-width: 760px;
+  }
+
+  .callout-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .callout-text {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* METRICS GRID */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+    max-width: 760px;
+  }
+
+  .metric {
+    background: var(--bg2);
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .metric-num {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 1px;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .metric-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* PIPELINE STEPS */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 760px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .pipeline-step {
+    display: flex;
+    gap: 20px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    align-items: flex-start;
+    transition: background 0.2s;
+  }
+
+  .pipeline-step:last-child { border-bottom: none; }
+  .pipeline-step:hover { background: var(--bg3); }
+
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    margin-top: 2px;
+    min-width: 32px;
+  }
+
+  .step-content { flex: 1; }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .step-arrow {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-dim);
+    align-self: center;
+  }
+
+  /* TERMINAL */
+  .terminal-wrap {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #060e0e;
+    max-width: 900px;
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    background: #0a1515;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .term-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .term-dot-r { background: #ff5f57; }
+  .term-dot-y { background: #febc2e; }
+  .term-dot-g { background: #28c840; }
+
+  .term-filename {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-left: 8px;
+  }
+
+  .term-body {
+    padding: 24px 28px;
+    overflow-x: auto;
+  }
+
+  .code-block {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.85;
+    white-space: pre;
+  }
+
+  .kw { color: #bb86fc; }
+  .fn { color: #00D4C8; }
+  .st { color: #f9a875; }
+  .cm { color: #3d5555; font-style: italic; }
+  .nm { color: #80cbc4; }
+  .py { color: #e8f0f0; }
+  .df { color: #7eb8ff; }
+  .an { color: #f9a875; font-style: italic; }
+
+  /* V2 ROADMAP */
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 900px;
+  }
+
+  .roadmap-item {
+    background: var(--bg2);
+    padding: 24px 28px;
+    transition: background 0.2s;
+  }
+
+  .roadmap-item:hover { background: var(--bg3); }
+
+  .roadmap-title {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--teal);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .roadmap-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* DECISION GRID */
+  .decision-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 760px;
+    margin-top: 8px;
+  }
+
+  .decision-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .decision-card:hover { border-color: var(--teal-border); }
+
+  .decision-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .decision-card.chosen { border-color: var(--teal-border); background: var(--teal-glow); }
+  .decision-card.chosen .decision-label { color: var(--teal); }
+
+  .decision-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .decision-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* KEYFRAMES */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .page-hero { padding: 120px 24px 60px; }
+    .project-selector { grid-template-columns: 1fr; }
+    .project-content { padding: 60px 24px; }
+    .roadmap-grid { grid-template-columns: 1fr; }
+    .decision-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">DG<span>.</span></a>
+  <a href="index.html" class="nav-back">← back to portfolio</a>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-label">Developer perspective</div>
+  <h1 class="page-title">Under<br>the <span>Hood</span></h1>
+  <p class="page-sub">Two projects. Real code. The thinking behind every architectural decision — not just what was built, but why each choice was made and what it cost.</p>
+</div>
+
+<!-- PROJECT SELECTOR -->
+<div class="project-selector" style="margin: 0 48px 0; max-width: none;">
+  <button class="proj-card active" onclick="switchProject('nn', this)">
+    <div class="proj-num">01 / Project</div>
+    <div class="proj-name">Neutral Note</div>
+    <p class="proj-desc">Toxicity detection and neutral rephrasing using BERT-based NLP and GPT-4. Built with a deliberate focus on algorithmic bias mitigation.</p>
+    <div class="proj-tags">
+      <span class="proj-tag">Django</span>
+      <span class="proj-tag">Detoxify</span>
+      <span class="proj-tag">GPT-4</span>
+      <span class="proj-tag">BERT</span>
+      <span class="proj-tag">Responsible AI</span>
+    </div>
+  </button>
+  <button class="proj-card" onclick="switchProject('sv', this)">
+    <div class="proj-num">02 / Project</div>
+    <div class="proj-name">SignVoice</div>
+    <p class="proj-desc">Real-time bidirectional sign language translator supporting both ASL and ISL. MediaPipe landmark detection feeding a CNN classifier.</p>
+    <div class="proj-tags">
+      <span class="proj-tag">MediaPipe</span>
+      <span class="proj-tag">TensorFlow</span>
+      <span class="proj-tag">OpenCV</span>
+      <span class="proj-tag">Django</span>
+      <span class="proj-tag">Accessibility</span>
+    </div>
+  </button>
+</div>
+
+<div class="full-divider" style="margin-top: 0;"></div>
+
+<!-- NEUTRAL NOTE CONTENT -->
+<div class="project-content active" id="proj-nn">
+
+  <!-- Problem -->
+  <div class="content-block">
+    <div class="block-label">01 / The problem</div>
+    <h2 class="block-title">A moderation problem<br>framed wrong</h2>
+    <div class="block-body">
+      <p>Digital platforms have a toxicity problem, but the existing solutions treat it as a <strong>content removal problem</strong> rather than a communication quality problem. Instagram, Facebook, and most platforms rely on rule-based systems or simple ML classifiers that either miss nuanced harmful language or delete flagged content without explanation.</p>
+      <p>The real user pain is not just that toxic content exists. It is that users have no feedback loop — no understanding of why their language is harmful, and no tools to self-correct. Neutral Note was built to fill that gap: detect toxic language in real time and immediately offer the user a neutral alternative, turning moderation into education.</p>
+    </div>
+  </div>
+
+  <!-- Product decision -->
+  <div class="content-block">
+    <div class="block-label">02 / The product decision</div>
+    <h2 class="block-title">Why rephrase.<br>Not flag. Not delete.</h2>
+    <div class="block-body">
+      <p>This was a deliberate product philosophy decision, not a technical default. Flagging or deleting content is punitive without being constructive — it tells a user their message is unacceptable but leaves them no better equipped to communicate differently.</p>
+      <p>When toxic content is detected, the system presents the user with three things simultaneously: the original text, the toxicity category it triggered, and a rephrased neutral alternative. The rephrased version preserves the original communicative intent while removing the harmful tone. The user's idea is not erased — it is improved.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-label">Concrete example</div>
+      <div class="callout-text">Input: <strong>"You are alcoholic"</strong> → Category: Insult → Rephrased: <strong>"It seems like you're struggling with alcohol use."</strong><br>The meaning shifts from accusatory to empathetic while carrying the same underlying observation.</div>
+    </div>
+    <div class="block-body">
+      <p>This approach also has practical advantages in professional contexts — outright deletion of a message in a workflow like an email draft or customer service reply would be disruptive. A neutral alternative keeps communication moving while removing the harm.</p>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="content-block">
+    <div class="block-label">03 / The architecture</div>
+    <h2 class="block-title">Why unbiased Detoxify.<br>Why GPT-4.</h2>
+    <div class="block-body">
+      <p>Detoxify offers three model variants: original, unbiased, and multilingual. The unbiased variant was chosen deliberately — not as a default — because toxicity is rarely about individual words. The same word can be neutral or harmful depending on sentence structure, target, and intent. The unbiased model evaluates surrounding context rather than pattern-matching on surface vocabulary.</p>
+    </div>
+
+    <div class="decision-grid">
+      <div class="decision-card">
+        <div class="decision-label">Option considered</div>
+        <div class="decision-title">Detoxify original</div>
+        <div class="decision-desc">Faster, lighter. But trained on data that showed documented bias against African American English dialect — flagging non-toxic AAE text as harmful.</div>
+      </div>
+      <div class="decision-card chosen">
+        <div class="decision-label">Chosen</div>
+        <div class="decision-title">Detoxify unbiased</div>
+        <div class="decision-desc">Built on BERT/RoBERTa with self-attention across full sentence context. Specifically trained to reduce identity-based false positives. The right call for responsible AI.</div>
+      </div>
+      <div class="decision-card">
+        <div class="decision-label">Option considered</div>
+        <div class="decision-title">Custom classification model</div>
+        <div class="decision-desc">Would require large labeled dataset, training time, and ongoing evaluation. Detoxify already offered a pre-trained, validated transformer architecture.</div>
+      </div>
+      <div class="decision-card chosen">
+        <div class="decision-label">Chosen for rephrasing</div>
+        <div class="decision-title">GPT-4 Turbo via API</div>
+        <div class="decision-desc">4096-token context window versus Detoxify's 512-token BERT limit. Capable of understanding not just what the input says but why it is harmful, then restructuring it naturally.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bias callout — the strongest section -->
+  <div class="content-block">
+    <div class="block-label">04 / The bias finding</div>
+    <h2 class="block-title">Catching what the<br>model got wrong</h2>
+    <div class="block-body">
+      <p>The standard Detoxify original model has a documented problem: it was trained on data that underrepresented African American English (AAE) dialect, causing it to flag non-toxic AAE text as harmful at a higher rate than equivalent Standard American English text. This is a form of algorithmic bias — the model's definition of "toxic" was shaped by who generated the training data, not by what is actually harmful.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-label">Key insight</div>
+      <div class="callout-text">This was not just a technical bug. It was a product decision with social consequences. A moderation tool that disproportionately flags one dialect of English is not a neutral tool — it is an enforcement mechanism with a bias built in. Choosing the unbiased model was the product-correct decision, not just the technically-correct one.</div>
+    </div>
+    <div class="block-body">
+      <p>The unbiased model evaluates text across nine identity labels — male, female, homosexual/gay/lesbian, Christian, Jewish, Muslim, Black, White, and psychiatric or mental illness — allowing it to detect not just overt aggression but targeted identity-based attacks while reducing false positives across dialects and communities.</p>
+      <p>The classification threshold was set at 0.65 across all seven toxicity categories. This was calibrated to balance precision against recall — high enough to avoid flagging ambiguous language, low enough to catch genuine harm. A threshold of 1.0 would catch nothing. A threshold of 0.1 would flag everything. 0.65 is a deliberate product decision, not a default.</p>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="content-block">
+    <div class="block-label">05 / The pipeline</div>
+    <h2 class="block-title">Input to output,<br>every step</h2>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">Authentication</div>
+          <div class="step-desc">User registers via Django auth. Passwords encoded with PyJWT, stored in MariaDB via XAMPP. Session managed through Django's built-in auth system.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">Text input via AJAX</div>
+          <div class="step-desc">Chatbot-style input field. AJAX handles form submission without page reloads. Text sent asynchronously to Django backend through URL routing.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">Sentence segmentation</div>
+          <div class="step-desc">Input text is split on ". " into individual sentences. Each sentence is analyzed independently to preserve per-sentence toxicity granularity.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">Detoxify classification</div>
+          <div class="step-desc">Each sentence passed to Detoxify unbiased model. Tokenized into subword units, converted to semantic embeddings, processed through stacked self-attention layers. Output: probability scores for 7 toxicity categories. Threshold: 0.65.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">05</span>
+        <div class="step-content">
+          <div class="step-title">GPT-4 rephrasing (toxic only)</div>
+          <div class="step-desc">If any category score exceeds 0.65, sentence sent to GPT-4 Turbo via OpenAI API. Prompt instructs GPT-4 to rewrite as neutral while preserving original communicative intent. Response extracted from choices[0].message.content.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">06</span>
+        <div class="step-content">
+          <div class="step-title">Output rendered</div>
+          <div class="step-desc">Each sentence mapped to: original text, toxicity category label, and rephrased alternative. All three displayed side-by-side in chatbot interface via displayRephrasedText().</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Numbers -->
+  <div class="content-block">
+    <div class="block-label">06 / The numbers</div>
+    <h2 class="block-title">Measured performance</h2>
+    <div class="metrics-grid">
+      <div class="metric">
+        <div class="metric-num">91%</div>
+        <div class="metric-label">Classification accuracy</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">88.4</div>
+        <div class="metric-label">F1 score</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">5%</div>
+        <div class="metric-label">False positive rate</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">83%</div>
+        <div class="metric-label">Rephrasing success</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">4.0/5</div>
+        <div class="metric-label">Output quality score</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">10-15s</div>
+        <div class="metric-label">Avg response time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="content-block">
+    <div class="block-label">07 / The code</div>
+    <h2 class="block-title">Core pipeline,<br>annotated</h2>
+    <div class="terminal-wrap">
+      <div class="terminal-bar">
+        <div class="term-dot term-dot-r"></div>
+        <div class="term-dot term-dot-y"></div>
+        <div class="term-dot term-dot-g"></div>
+        <span class="term-filename">neutral_note/views.py</span>
+      </div>
+      <div class="term-body">
+        <div class="code-block"><span class="cm"># 'unbiased' variant chosen specifically to reduce AAE dialect false positives</span>
+<span class="df">def</span> <span class="fn">analyze_text</span>(<span class="py">sentence</span>):
+    <span class="py">model</span> = <span class="fn">Detoxify</span>(<span class="st">'unbiased'</span>)
+    <span class="py">scores</span> = <span class="py">model</span>.<span class="fn">predict</span>(<span class="py">sentence</span>)
+
+    <span class="cm"># 0.65 threshold — calibrated to balance precision vs recall</span>
+    <span class="cm"># checks 6 categories; 'toxicity' intentionally commented out</span>
+    <span class="cm"># to avoid over-flagging ambiguous language</span>
+    <span class="kw">if</span> <span class="py">scores</span>[<span class="st">'obscene'</span>]         > <span class="nm">0.65</span>: <span class="kw">return</span> <span class="st">"obscene"</span>
+    <span class="kw">elif</span> <span class="py">scores</span>[<span class="st">'identity_attack'</span>]  > <span class="nm">0.65</span>: <span class="kw">return</span> <span class="st">"identity_attack"</span>
+    <span class="kw">elif</span> <span class="py">scores</span>[<span class="st">'insult'</span>]          > <span class="nm">0.65</span>: <span class="kw">return</span> <span class="st">"insult"</span>
+    <span class="kw">elif</span> <span class="py">scores</span>[<span class="st">'threat'</span>]          > <span class="nm">0.65</span>: <span class="kw">return</span> <span class="st">"threat"</span>
+    <span class="kw">elif</span> <span class="py">scores</span>[<span class="st">'sexual_explicit'</span>]  > <span class="nm">0.65</span>: <span class="kw">return</span> <span class="st">"sexual_explicit"</span>
+    <span class="kw">return</span> <span class="st">"Non-Toxic"</span>
+
+<span class="cm"># GPT-4 handles rephrasing — larger context window (4096 tokens)</span>
+<span class="cm"># than Detoxify's BERT limit (512 tokens)</span>
+<span class="df">def</span> <span class="fn">rephrase_toxic</span>(<span class="py">sentence</span>):
+    <span class="py">model</span> = <span class="nm">genai</span>.<span class="fn">GenerativeModel</span>(<span class="st">'gemini-pro'</span>)
+    <span class="py">query</span> = <span class="st">f"Rephrase to be neutral, preserve original intent: '</span><span class="nm">{sentence}</span><span class="st">'"</span>
+    <span class="py">response</span> = <span class="py">model</span>.<span class="fn">generate_content</span>(<span class="py">query</span>)
+    <span class="kw">return</span> <span class="py">response</span>.<span class="nm">text</span>.<span class="fn">strip</span>() <span class="kw">if</span> <span class="py">response</span>.<span class="nm">parts</span> <span class="kw">else</span> <span class="st">"No safe rephrasing found."</span>
+
+<span class="cm"># Full pipeline: split → analyze → rephrase if toxic → return structured diff</span>
+<span class="py">results</span> = [{
+    <span class="st">"original"</span>:   <span class="py">s</span>,
+    <span class="st">"category"</span>:   (<span class="py">cat</span> := <span class="fn">analyze_text</span>(<span class="py">s</span>)),
+    <span class="st">"rephrased"</span>:  <span class="fn">rephrase_toxic</span>(<span class="py">s</span>) <span class="kw">if</span> <span class="py">cat</span> != <span class="st">"Non-Toxic"</span> <span class="kw">else</span> <span class="py">s</span>
+} <span class="kw">for</span> <span class="py">s</span> <span class="kw">in</span> <span class="py">text</span>.<span class="fn">split</span>(<span class="st">". "</span>)]</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V2 Roadmap -->
+  <div class="content-block">
+    <div class="block-label">08 / What comes next</div>
+    <h2 class="block-title">The V2 roadmap</h2>
+    <div class="roadmap-grid">
+      <div class="roadmap-item">
+        <div class="roadmap-title">Ensemble learning</div>
+        <div class="roadmap-desc">Bagging, boosting, or stacking multiple models to aggregate predictions and reduce the impact of individual model weaknesses. Directly addresses current false positive and false negative rates.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">Domain-specific fine-tuning</div>
+        <div class="roadmap-desc">Fine-tune on journalism, healthcare, or corporate communication datasets. Language that is neutral in isolation can be harmful in a specific professional context — general training data misses this entirely.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">Real-time detection</div>
+        <div class="roadmap-desc">Flag language as the user types rather than after submission. Shifts from reactive moderation to proactive prevention — reducing harmful content before it is even finalized.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">Multi-language support</div>
+        <div class="roadmap-desc">Current system is English-only. Extending detection and rephrasing to other languages — with culturally-adjusted thresholds — is the highest-priority expansion to reach global users.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">Social media API integration</div>
+        <div class="roadmap-desc">Browser extension or platform API integration moves Neutral Note from a standalone tool to an embedded real-time moderator operating at the point of content creation on Twitter, Instagram, and Facebook.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">User-adjustable thresholds</div>
+        <div class="roadmap-desc">Allow professionals to tune detection thresholds and rephrasing styles to their domain. Appropriate language in a legal document is not the same as in a social media post.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SIGNVOICE CONTENT -->
+<div class="project-content" id="proj-sv">
+
+  <!-- Problem -->
+  <div class="content-block">
+    <div class="block-label">01 / The problem</div>
+    <h2 class="block-title">70 million people.<br>No real-time bridge.</h2>
+    <div class="block-body">
+      <p>Over 70 million deaf individuals worldwide rely on sign languages like ASL and ISL to communicate. The vast majority of hearing people have no sign language proficiency, and professional interpreters are expensive, scarce, and unavailable in most everyday situations — a deaf student in a classroom, a patient describing symptoms to a doctor, a job applicant in an interview.</p>
+      <p>Existing tools are almost universally <strong>unidirectional</strong>. They either convert sign to text, or speech to sign — never both. They rely on static datasets, sensor-based hardware like gloves, or low-quality animations that break natural conversational flow. SignVoice was built to close that gap with a web-based, <strong>bidirectional, real-time</strong> platform supporting both ASL and ISL — no hardware required.</p>
+    </div>
+  </div>
+
+  <!-- The product decision — bidirectional -->
+  <div class="content-block">
+    <div class="block-label">02 / The product decision</div>
+    <h2 class="block-title">Bidirectional by design.<br>Not by accident.</h2>
+    <div class="block-body">
+      <p>Most existing tools are translation pipelines in one direction. The fundamental design decision behind SignVoice was to build genuine two-way communication — which required two completely separate technical subsystems, not one system run in reverse.</p>
+    </div>
+    <div class="decision-grid">
+      <div class="decision-card chosen">
+        <div class="decision-label">Sign to Speech</div>
+        <div class="decision-title">For deaf and hard-of-hearing users</div>
+        <div class="decision-desc">Webcam input → MediaPipe landmarks → CNN classification → word assembly via Enchant → Microsoft TTS (English) or Google Translate + gTTS (Hindi).</div>
+      </div>
+      <div class="decision-card chosen">
+        <div class="decision-label">Speech to Sign</div>
+        <div class="decision-title">For hearing users</div>
+        <div class="decision-desc">Microphone input → Webkit Speech Recognition → text tokenization → Blender 3D avatar animation library → animated sign playback with speed controls.</div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-label">Why both directions matter</div>
+      <div class="callout-text">A deaf student cannot participate in a classroom where the teacher can sign to them but they cannot sign back and be understood. Real conversation requires both directions. Building only one would have replicated the very exclusion the system was trying to solve.</div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="content-block">
+    <div class="block-label">03 / The architecture</div>
+    <h2 class="block-title">MediaPipe. OpenCV. CNN.<br>Three layers, one purpose.</h2>
+    <div class="block-body">
+      <p>The sign recognition pipeline is built on three technologies working in sequence — each handling a distinct part of the problem.</p>
+      <p><strong>MediaPipe</strong> processes the live webcam feed and extracts 21 key landmarks per hand, covering all fingertips, knuckle joints, and palm orientation. Instead of asking a neural network to interpret a raw pixel image, the system feeds it a clean geometric representation of hand shape — exact 3D coordinates of every relevant point.</p>
+      <p><strong>OpenCV</strong> converts each frame from raw color to grayscale then to binary — a high-contrast representation that strips away background noise and lighting variation. The CNN does not need to learn that the same gesture looks different under fluorescent versus natural light. That problem is solved before the model ever sees the image.</p>
+      <p><strong>The CNN</strong> (TensorFlow and Keras) then classifies the preprocessed binary image against its training dataset. Trained on labeled ASL and ISL gestures with data augmentation — rotation, flipping, scaling, brightness adjustment — to generalize across different users, cameras, and environments. Achieved <strong>94.2% accuracy</strong> on static alphabet signs.</p>
+    </div>
+  </div>
+
+  <!-- 8 group disambiguation -->
+  <div class="content-block">
+    <div class="block-label">04 / The technical insight</div>
+    <h2 class="block-title">Why geometry beats<br>the CNN alone</h2>
+    <div class="block-body">
+      <p>The CNN achieves 94% accuracy, but some ASL signs are so visually similar that a pure image classifier struggles to distinguish them reliably. The signs for A, S, and E all involve a closed fist — the difference is only in thumb positioning. M, N, and T are nearly identical at a glance.</p>
+      <p>The solution is a <strong>two-stage classification system</strong>. First, the CNN groups signs into 8 broad clusters (ch1 == 0 through ch1 == 7) based on overall hand shape. Then, within each cluster, geometric rules using landmark distances and positional relationships make the final determination.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-label">Example — disambiguation in action</div>
+      <div class="callout-text">Signs A, S, E, M, N, T all land in group 0. The CNN says "closed fist." Then landmark geometry takes over: if pts[4][0] is greater than pts[6][0] and pts[4][0] is greater than pts[10][0] and greater than pts[14][0] — thumb position relative to finger joints — the system classifies as A. Distance between pts[12] and pts[4] distinguishes C from O. Distance between pts[8] and pts[12] separates G from H. The geometry knows what the pixel classifier cannot.</div>
+    </div>
+  </div>
+
+  <!-- ASL vs ISL -->
+  <div class="content-block">
+    <div class="block-label">05 / The inclusivity decision</div>
+    <h2 class="block-title">ASL and ISL.<br>Not interchangeable.</h2>
+    <div class="block-body">
+      <p>Supporting both sign languages was not a feature addition — it was an inclusivity requirement. A system that only supported ASL would exclude the Indian deaf community the project was built to serve. A system that only supported ISL would limit international reach and compatibility with the larger global body of sign language research.</p>
+      <p>Critically, <strong>ASL and ISL are not the same with different labels.</strong> While both use the A-to-Z alphabet, the hand shapes, finger orientations, and positional conventions for individual letters differ meaningfully between them. The same letter is not the same gesture.</p>
+      <p>This difference runs through every layer of the system — separate training datasets, separate Blender-rendered 3D animation libraries, separate SVG dictionary icons, separate quiz banks in the learning module, and a real-time toggle that switches between them across all four modules simultaneously.</p>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="content-block">
+    <div class="block-label">06 / The pipeline</div>
+    <h2 class="block-title">Sign to Speech,<br>every step</h2>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <span class="step-num">01</span>
+        <div class="step-content">
+          <div class="step-title">Webcam capture</div>
+          <div class="step-desc">Live video feed captured in browser. Each frame passed to the processing pipeline in real time.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">02</span>
+        <div class="step-content">
+          <div class="step-title">MediaPipe landmark extraction</div>
+          <div class="step-desc">21 hand landmarks extracted per frame — fingertips, knuckle joints, palm orientation — giving the system a 3D geometric map of hand shape.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">03</span>
+        <div class="step-content">
+          <div class="step-title">OpenCV preprocessing</div>
+          <div class="step-desc">Frame converted to grayscale then binary. Background noise, lighting variation, and irrelevant visual data stripped before classification.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">04</span>
+        <div class="step-content">
+          <div class="step-title">CNN classification with confidence threshold</div>
+          <div class="step-desc">Binary image classified against training dataset. If confidence falls below threshold, user is prompted to re-sign rather than propagating a low-confidence character into the word buffer.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">05</span>
+        <div class="step-content">
+          <div class="step-title">Geometric disambiguation</div>
+          <div class="step-desc">Within each of the 8 CNN groups, landmark distance and positional rules make the final character determination for visually similar signs.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">06</span>
+        <div class="step-content">
+          <div class="step-title">Word assembly via Enchant</div>
+          <div class="step-desc">Recognized characters accumulated in a letter buffer. Python Enchant library generates word completion suggestions in a horizontal suggestion bar as letters build up.</div>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <span class="step-num">07</span>
+        <div class="step-content">
+          <div class="step-title">Speech synthesis</div>
+          <div class="step-desc">Completed sentence passed to Microsoft TTS API for English output, or Google Translate API plus gTTS for Hindi — giving the system genuine bilingual spoken output.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Numbers -->
+  <div class="content-block">
+    <div class="block-label">07 / The numbers</div>
+    <h2 class="block-title">Measured performance</h2>
+    <div class="metrics-grid">
+      <div class="metric">
+        <div class="metric-num">94.2%</div>
+        <div class="metric-label">Gesture accuracy</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">96.5%</div>
+        <div class="metric-label">Speech recognition</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">1.4s</div>
+        <div class="metric-label">Avg response time</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">89%</div>
+        <div class="metric-label">WCAG AA score</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">4.5/5</div>
+        <div class="metric-label">User satisfaction</div>
+      </div>
+      <div class="metric">
+        <div class="metric-num">10/10</div>
+        <div class="metric-label">Test cases passed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code -->
+  <div class="content-block">
+    <div class="block-label">08 / The code</div>
+    <h2 class="block-title">The classification logic,<br>annotated</h2>
+    <div class="terminal-wrap">
+      <div class="terminal-bar">
+        <div class="term-dot term-dot-r"></div>
+        <div class="term-dot term-dot-y"></div>
+        <div class="term-dot term-dot-g"></div>
+        <span class="term-filename">signvoice/views.py</span>
+      </div>
+      <div class="term-body">
+        <div class="code-block"><span class="cm"># Stage 1: CNN outputs one of 8 broad hand-shape groups (ch1 == 0..7)</span>
+<span class="cm"># Stage 2: geometric rules use landmark distances to make final call</span>
+<span class="cm"># This is why the system beats a pure pixel classifier on similar signs</span>
+
+<span class="df">def</span> <span class="fn">predict</span>(<span class="py">self</span>, <span class="py">test_image</span>):
+    <span class="py">white</span> = <span class="py">test_image</span>.<span class="fn">reshape</span>(<span class="nm">1</span>, <span class="nm">400</span>, <span class="nm">400</span>, <span class="nm">3</span>)
+    <span class="py">prob</span> = <span class="nm">np</span>.<span class="fn">array</span>(<span class="py">self</span>.<span class="py">model</span>.<span class="fn">predict</span>(<span class="py">white</span>)[<span class="nm">0</span>], dtype=<span class="st">'float32'</span>)
+    <span class="py">ch1</span> = <span class="nm">np</span>.<span class="fn">argmax</span>(<span class="py">prob</span>)  <span class="cm"># top group from CNN (0-7)</span>
+
+    <span class="cm"># Group 0 = closed fist family: A, E, M, N, S, T</span>
+    <span class="cm"># Landmark geometry disambiguates — thumb position relative to fingers</span>
+    <span class="kw">if</span> <span class="py">ch1</span> == <span class="nm">0</span>:
+        <span class="py">ch1</span> = <span class="st">'S'</span>  <span class="cm"># default</span>
+        <span class="kw">if</span> <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">4</span>][<span class="nm">0</span>] < <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">6</span>][<span class="nm">0</span>]:      <span class="cm"># thumb inside fingers</span>
+            <span class="py">ch1</span> = <span class="st">'A'</span>
+        <span class="kw">if</span> <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">4</span>][<span class="nm">1</span>] > <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">8</span>][<span class="nm">1</span>]:      <span class="cm"># all fingers curled under</span>
+            <span class="py">ch1</span> = <span class="st">'E'</span>
+        <span class="kw">if</span> <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">4</span>][<span class="nm">0</span>] > <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">10</span>][<span class="nm">0</span>]:     <span class="cm"># thumb crosses middle</span>
+            <span class="py">ch1</span> = <span class="st">'M'</span>
+
+    <span class="cm"># Group 2 = rounded hand: C or O</span>
+    <span class="cm"># Distance between thumb tip (pt4) and middle finger (pt12) is the key</span>
+    <span class="kw">if</span> <span class="py">ch1</span> == <span class="nm">2</span>:
+        <span class="py">ch1</span> = <span class="st">'C'</span> <span class="kw">if</span> <span class="py">self</span>.<span class="fn">distance</span>(<span class="py">self</span>.<span class="py">pts</span>[<span class="nm">12</span>], <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">4</span>]) > <span class="nm">42</span> <span class="kw">else</span> <span class="st">'O'</span>
+
+    <span class="cm"># Group 3 = extended index family: G or H</span>
+    <span class="cm"># Distance between index (pt8) and middle (pt12) fingertips</span>
+    <span class="kw">if</span> <span class="py">ch1</span> == <span class="nm">3</span>:
+        <span class="py">ch1</span> = <span class="st">'G'</span> <span class="kw">if</span> <span class="py">self</span>.<span class="fn">distance</span>(<span class="py">self</span>.<span class="py">pts</span>[<span class="nm">8</span>], <span class="py">self</span>.<span class="py">pts</span>[<span class="nm">12</span>]) > <span class="nm">72</span> <span class="kw">else</span> <span class="st">'H'</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V2 Roadmap -->
+  <div class="content-block">
+    <div class="block-label">09 / What comes next</div>
+    <h2 class="block-title">The V2 roadmap</h2>
+    <div class="roadmap-grid">
+      <div class="roadmap-item">
+        <div class="roadmap-title">LSTM dynamic gesture recognition</div>
+        <div class="roadmap-desc">Current CNN classifies static snapshots. V2 integrates LSTM/RNN sequence models to process sign input as a time series — recognizing full words, phrases, and verbs involving movement, not just frozen alphabet letters.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">Facial expression grammar</div>
+        <div class="roadmap-desc">Sign language grammar relies on facial expressions — raised eyebrows turn statements into questions. Adding computer vision facial analysis captures non-manual components the current system misses entirely.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">NLP grammar-aware translation</div>
+        <div class="roadmap-desc">ASL and ISL have syntactic structures that differ from spoken English. An NLP grammar correction layer would restructure transcribed sentences to match sign language syntax before animating — producing linguistically natural output.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">TensorFlow Lite edge deployment</div>
+        <div class="roadmap-desc">Model quantization for offline use on low-resource devices. Makes SignVoice viable in rural classrooms, low-resource clinics, and settings where reliable internet access cannot be assumed.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">Mobile apps — Android and iOS</div>
+        <div class="roadmap-desc">Extending beyond desktop web browsers dramatically increases reach, particularly in contexts where smartphones are the primary computing device.</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-title">AR sign overlays</div>
+        <div class="roadmap-desc">Point camera at real-world objects and see sign language overlays contextually. Shifts from structured quiz learning to immersive, situational language acquisition.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="full-divider"></div>
+<footer style="max-width:1100px;margin:0 auto;padding:32px 48px;display:flex;justify-content:space-between;align-items:center;">
+  <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:1px;">Darshitha Gongle <span style="color:var(--teal);">·</span> 2026</span>
+  <a href="index.html" style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-decoration:none;letter-spacing:1px;transition:color 0.2s;" onmouseover="this.style.color='var(--teal)'" onmouseout="this.style.color='var(--text-muted)'">← back to portfolio</a>
+</footer>
+
+<script>
+  function switchProject(id, btn) {
+    document.querySelectorAll('.proj-card').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.project-content').forEach(c => {
+      c.classList.remove('active', 'visible');
+    });
+
+    const target = document.getElementById('proj-' + id);
+    target.classList.add('active');
+    setTimeout(() => target.classList.add('visible'), 20);
+
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Animate in initial content
+  setTimeout(() => {
+    const nn = document.getElementById('proj-nn');
+    nn.classList.add('visible');
+  }, 600);
+</script>
+</body>
+</html>
