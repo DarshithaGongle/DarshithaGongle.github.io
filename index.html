@@ -709,6 +709,125 @@
 
   .footer-text span { color: var(--teal); }
 
+  /* ── TIMELINE ── */
+  #journey { padding: 100px 48px; max-width: 1100px; margin: 0 auto; }
+
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 8px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .tl-item {
+    position: relative;
+    padding: 0 0 0 40px;
+    cursor: pointer;
+  }
+
+  .tl-dot {
+    position: absolute;
+    left: -5px; top: 12px;
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    border: 1px solid var(--text-dim);
+    background: var(--bg);
+    transition: all 0.3s;
+  }
+
+  .tl-item.active .tl-dot,
+  .tl-item:hover .tl-dot {
+    border-color: var(--teal);
+    background: var(--teal);
+    box-shadow: 0 0 12px rgba(0,212,200,0.4);
+  }
+
+  .tl-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    padding: 12px 0 10px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+
+  .tl-item:hover .tl-header { border-color: var(--border); }
+
+  .tl-year {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  .tl-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: var(--text);
+    transition: color 0.2s;
+  }
+
+  .tl-item:hover .tl-title,
+  .tl-item.active .tl-title { color: var(--teal); }
+
+  .tl-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .tl-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.45s ease, padding 0.3s ease;
+    padding: 0 0 0 0;
+  }
+
+  .tl-item.active .tl-body {
+    max-height: 300px;
+    padding: 16px 0 28px;
+  }
+
+  .tl-text {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.8;
+    max-width: 640px;
+  }
+
+  .tl-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--teal);
+    border: 1px solid var(--teal-border);
+    background: var(--teal-glow);
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin: 12px 6px 0 0;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 768px) {
+    #journey { padding: 80px 24px; }
+    .tl-sub { display: none; }
+  }
+
   /* ── SCROLL ANIMATIONS ── */
   .reveal {
     opacity: 0;
@@ -791,6 +910,7 @@
   <ul class="nav-links">
     <li><a href="#work">work</a></li>
     <li><a href="#experience">experience</a></li>
+    <li><a href="#journey">journey</a></li>
     <li><a href="#skills">skills</a></li>
     <li><a href="#contact">contact</a></li>
   </ul>
@@ -1006,6 +1126,97 @@
 
 <div class="full-divider"></div>
 
+<!-- JOURNEY TIMELINE -->
+<section id="journey">
+  <div class="section-label">How I got here</div>
+  <h2 class="section-title reveal">My Journey</h2>
+
+  <div class="timeline reveal">
+
+    <div class="tl-item active" onclick="toggleTL(this)">
+      <div class="tl-dot"></div>
+      <div class="tl-header">
+        <span class="tl-year">2015</span>
+        <span class="tl-title">The spark</span>
+        <span class="tl-sub">Hyderabad, India</span>
+      </div>
+      <div class="tl-body">
+        <p class="tl-text">Growing up in the 2000s, the internet felt like magic. I spent hours on Google just trying to understand how webpages worked — what was behind the screen, who built them, how. Between sophomore and junior year of high school, I wrote my first lines of code. Back then, doing anything on a computer felt powerful. I held onto that feeling.</p>
+        <span class="tl-tag">HTML/CSS</span>
+        <span class="tl-tag">Curiosity</span>
+        <span class="tl-tag">First code</span>
+      </div>
+    </div>
+
+    <div class="tl-item" onclick="toggleTL(this)">
+      <div class="tl-dot"></div>
+      <div class="tl-header">
+        <span class="tl-year">2021 – 2025</span>
+        <span class="tl-title">The shift</span>
+        <span class="tl-sub">VJIT · Hyderabad</span>
+      </div>
+      <div class="tl-body">
+        <p class="tl-text">Somewhere in the middle of building Neutral Note, I stopped caring about the model accuracy and started caring about whether anyone would actually trust it. I was thinking about who would use it, why they'd be skeptical, and what we'd have to prove before they believed it. I hadn't written a single line of PM theory. I was just thinking like one.</p>
+        <span class="tl-tag">Neutral Note</span>
+        <span class="tl-tag">SignVoice</span>
+        <span class="tl-tag">Product thinking</span>
+        <span class="tl-tag">B.Tech CS</span>
+      </div>
+    </div>
+
+    <div class="tl-item" onclick="toggleTL(this)">
+      <div class="tl-dot"></div>
+      <div class="tl-header">
+        <span class="tl-year">Feb – Jul 2024</span>
+        <span class="tl-title">First real job</span>
+        <span class="tl-sub">RecVue · Hyderabad</span>
+      </div>
+      <div class="tl-body">
+        <p class="tl-text">RecVue was fast and unforgiving, exactly what I needed. In a matter of weeks I went from observing to owning: writing PRDs, running sprint planning, managing roadmaps, navigating stakeholder tradeoffs. I'd never done any of it formally before. I figured it out by doing it, often in the same meeting where I first encountered it.</p>
+        <span class="tl-tag">PRDs</span>
+        <span class="tl-tag">Roadmap</span>
+        <span class="tl-tag">Agile</span>
+        <span class="tl-tag">Stakeholders</span>
+        <span class="tl-tag">B2B SaaS</span>
+      </div>
+    </div>
+
+    <div class="tl-item" onclick="toggleTL(this)">
+      <div class="tl-dot"></div>
+      <div class="tl-header">
+        <span class="tl-year">2025 – Present</span>
+        <span class="tl-title">Going deeper</span>
+        <span class="tl-sub">ASU · EdPlus · Tempe</span>
+      </div>
+      <div class="tl-body">
+        <p class="tl-text">At EdPlus I discovered something I hadn't expected — a genuine passion for accessibility. Small changes in a UI can make a product usable or unusable for someone with a physical or cognitive disability. That's not a trivial detail, that's the whole product. Alongside this, I'm completing my MS in CS at ASU with a specialization in AI/ML — going deeper on the technical side while staying grounded in user impact.</p>
+        <span class="tl-tag">Accessibility</span>
+        <span class="tl-tag">WCAG 2.1</span>
+        <span class="tl-tag">A/B Testing</span>
+        <span class="tl-tag">MS CS · AI/ML</span>
+      </div>
+    </div>
+
+    <div class="tl-item" onclick="toggleTL(this)">
+      <div class="tl-dot"></div>
+      <div class="tl-header">
+        <span class="tl-year">Next</span>
+        <span class="tl-title">The next chapter</span>
+        <span class="tl-sub">Open to opportunities</span>
+      </div>
+      <div class="tl-body">
+        <p class="tl-text">I don't have a rigid title in mind. I want to be close enough to the problem to have real opinions about it, whether that's shaping what gets built, building it, or making sure it actually works before it ships. Wherever that intersection is, that's where I want to be.</p>
+        <span class="tl-tag">TPM</span>
+        <span class="tl-tag">AI Products</span>
+        <span class="tl-tag">Open to work</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
 <!-- CONTACT -->
 <section id="contact">
   <div class="contact-glow"></div>
@@ -1109,6 +1320,13 @@
       }
       setTimeout(type, 40);
     }
+  }
+
+  // Timeline toggle
+  function toggleTL(item) {
+    const isActive = item.classList.contains('active');
+    document.querySelectorAll('.tl-item').forEach(i => i.classList.remove('active'));
+    if (!isActive) item.classList.add('active');
   }
 
   // Start after hero fade-in completes
